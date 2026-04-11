@@ -18,4 +18,10 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: "./src/setupTests.ts",
   },
+  build: {
+    // Output directory outside of project root
+    outDir: path.resolve(__dirname, '../infra/resources/build'),
+    // Ensure the external folder is cleaned before building
+    emptyOutDir: true,
+  },
 });
