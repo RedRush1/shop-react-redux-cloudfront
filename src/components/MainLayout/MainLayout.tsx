@@ -9,8 +9,8 @@ function Copyright() {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
       {"Copyright © "}
-      <Link color="inherit" href="https://material-ui.com/" underline="hover">
-        My Store
+      <Link color="inherit" href="/" underline="hover">
+        TechZone
       </Link>{" "}
       {new Date().getFullYear()}
       {"."}
@@ -37,7 +37,16 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           color="textSecondary"
           component="p"
         >
-          Thank you for your purchase!
+          Thank you for shopping at TechZone!
+        </Typography>
+        <Typography
+          variant="body2"
+          align="center"
+          color="textSecondary"
+          component="p"
+          sx={{ mt: 1 }}
+        >
+          Built with ❤️ by <strong>Vasyl Rebresh</strong>
         </Typography>
         <Copyright />
       </Box>
