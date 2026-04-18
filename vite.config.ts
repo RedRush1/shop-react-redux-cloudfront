@@ -20,7 +20,7 @@ export default defineConfig({
   },
   build: {
     // Output directory outside of project root
-    outDir: path.resolve(__dirname, '../infra/resources/build'),
+    outDir: path.resolve(__dirname, 'infra/resources/build'),
     // Ensure the external folder is cleaned before building
     emptyOutDir: true,
   },
