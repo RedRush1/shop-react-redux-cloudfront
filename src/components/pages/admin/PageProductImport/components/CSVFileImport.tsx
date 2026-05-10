@@ -1,6 +1,7 @@
 import React from "react";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
+import axios from "axios";
 
 type CSVFileImportProps = {
   url: string;
@@ -9,38 +10,34 @@ type CSVFileImportProps = {
 
 export default function CSVFileImport({ url, title }: CSVFileImportProps) {
   const [file, setFile] = React.useState<File>();
+  const [status, setStatus] = React.useState<"idle" | "uploading" | "done" | "error">("idle");
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      const file = files[0];
-      setFile(file);
+      setFile(files[0]);
+      setStatus("idle");
     }
   };
 
   const removeFile = () => {
     setFile(undefined);
+    setStatus("idle");
   };
 
   const uploadFile = async () => {
-    console.log("uploadFile to", url);
-
-    // Get the presigned URL
-    // const response = await axios({
-    //   method: "GET",
-    //   url,
-    //   params: {
-    //     name: encodeURIComponent(file.name),
-    //   },
-    // });
-    // console.log("File to upload: ", file.name);
-    // console.log("Uploading to: ", response.data);
-    // const result = await fetch(response.data, {
-    //   method: "PUT",
-    //   body: file,
-    // });
-    // console.log("Result: ", result);
-    // setFile("");
+    if (!file) return;
+    setStatus("uploading");
+    try {
+      const response = await axios.get(url, {
+        params: { name: encodeURIComponent(file.name) },
+      });
+      await fetch(response.data, { method: "PUT", body: file });
+      setFile(undefined);
+      setStatus("done");
+    } catch {
+      setStatus("error");
+    }
   };
   return (
     <Box>
@@ -48,13 +45,18 @@ export default function CSVFileImport({ url, title }: CSVFileImportProps) {
         {title}
       </Typography>
       {!file ? (
-        <input type="file" onChange={onFileChange} />
+        <input type="file" accept=".csv" onChange={onFileChange} />
       ) : (
         <div>
-          <button onClick={removeFile}>Remove file</button>
-          <button onClick={uploadFile}>Upload file</button>
+          <span style={{ marginRight: 8 }}>{file.name}</span>
+          <button onClick={removeFile} disabled={status === "uploading"}>Remove file</button>
+          <button onClick={uploadFile} disabled={status === "uploading"}>
+            {status === "uploading" ? "Uploading..." : "Upload file"}
+          </button>
         </div>
       )}
+      {status === "done" && <Typography color="success.main" variant="body2">Uploaded successfully!</Typography>}
+      {status === "error" && <Typography color="error" variant="body2">Upload failed. Please try again.</Typography>}
     </Box>
   );
 }
