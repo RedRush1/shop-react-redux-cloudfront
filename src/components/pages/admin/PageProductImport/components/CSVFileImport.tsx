@@ -10,7 +10,9 @@ type CSVFileImportProps = {
 
 export default function CSVFileImport({ url, title }: CSVFileImportProps) {
   const [file, setFile] = React.useState<File>();
-  const [status, setStatus] = React.useState<"idle" | "uploading" | "done" | "error">("idle");
+  const [status, setStatus] = React.useState<
+    "idle" | "uploading" | "done" | "error"
+  >("idle");
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -29,13 +31,34 @@ export default function CSVFileImport({ url, title }: CSVFileImportProps) {
     if (!file) return;
     setStatus("uploading");
     try {
+      const authorization_token = localStorage.getItem("authorization_token");
       const response = await axios.get(url, {
-        params: { name: encodeURIComponent(file.name) },
+        params: { name: file.name },
+        headers: {
+          Authorization: `Basic ${authorization_token}`,
+        },
       });
-      await fetch(response.data, { method: "PUT", body: file });
+      const signedUrl =
+        typeof response.data === "string" ? response.data : response.data.url;
+      await fetch(signedUrl, { method: "PUT", body: file });
       setFile(undefined);
       setStatus("done");
-    } catch {
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        if (status === 401) {
+          alert(
+            "You are not authorized. Please provide a valid authorization token."
+          );
+        } else if (status === 403) {
+          alert("You do not have permission to perform this action.");
+        } else {
+          // status 0 or undefined: CORS-blocked 401/403 — real status unreadable
+          alert(
+            "You are not authorized. Please provide a valid authorization token."
+          );
+        }
+      }
       setStatus("error");
     }
   };
@@ -49,14 +72,24 @@ export default function CSVFileImport({ url, title }: CSVFileImportProps) {
       ) : (
         <div>
           <span style={{ marginRight: 8 }}>{file.name}</span>
-          <button onClick={removeFile} disabled={status === "uploading"}>Remove file</button>
+          <button onClick={removeFile} disabled={status === "uploading"}>
+            Remove file
+          </button>
           <button onClick={uploadFile} disabled={status === "uploading"}>
             {status === "uploading" ? "Uploading..." : "Upload file"}
           </button>
         </div>
       )}
-      {status === "done" && <Typography color="success.main" variant="body2">Uploaded successfully!</Typography>}
-      {status === "error" && <Typography color="error" variant="body2">Upload failed. Please try again.</Typography>}
+      {status === "done" && (
+        <Typography color="success.main" variant="body2">
+          Uploaded successfully!
+        </Typography>
+      )}
+      {status === "error" && (
+        <Typography color="error" variant="body2">
+          Upload failed. Please try again.
+        </Typography>
+      )}
     </Box>
   );
 }
