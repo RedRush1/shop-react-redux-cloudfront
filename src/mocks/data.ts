@@ -1,5 +1,5 @@
 import { OrderStatus } from "~/constants/order";
-import { CartItem } from "~/models/CartItem";
+import { CartApiItem } from "~/models/CartItem";
 import { Order } from "~/models/Order";
 import { Product } from "~/models/Product";
 
@@ -61,15 +61,9 @@ export const products: Product[] = [
 /** @deprecated Use {@link products} directly — Product already contains stock count. */
 export const availableProducts: Product[] = products;
 
-export const cart: CartItem[] = [
-  {
-    product: products[0], // Samsung Galaxy S25 Ultra
-    count: 1,
-  },
-  {
-    product: products[5], // Corsair Dominator DDR5 32GB
-    count: 2,
-  },
+export const cart: CartApiItem[] = [
+  { id: "cart-item-1", product_id: products[0].id!, count: 1 },
+  { id: "cart-item-2", product_id: products[5].id!, count: 2 },
 ];
 
 export const orders: Order[] = [
